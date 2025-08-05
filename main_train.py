@@ -37,7 +37,7 @@ Parameters
 
 # running on a personal computer with or a GPU server
 computer = 'cuda'  # 'cpu' | 'cuda'
-preload = False  # load pre-trained model prior to the training phase
+preload = True  # load pre-trained model prior to the training phase
 
 # risk measures used
 rm_list = [['CVaR','CVaR']]
@@ -94,10 +94,8 @@ for idx_method, method in enumerate(rm_list):
 
         if mortality == 'qx_exproj':
             mortality_rates = np.array([envParams["qx_exproj"] for _ in range(algoParams["Ntrajectories"])])
-        elif mortality == 'qx_proj':
-            mortality_rates = np.array([envParams["qx_proj"] for _ in range(algoParams["Ntrajectories"])])
         elif mortality == 'qx_lc':
-            mortality_rates = env.LC_mortality_generator(algoParams["Ntrajectories"], num_years=envParams["Ndt"])
+            mortality_rates = np.array([envParams["qx_lc"] for _ in range(algoParams["Ntrajectories"])])
 
         # create policy & value function objects
         # single neural network; (wealth x income x time)
@@ -206,4 +204,5 @@ for idx_method, method in enumerate(rm_list):
         plt.tight_layout()
         plt.savefig(repo + '/' + mortality + '/training_loss_policy.eps')
         plt.clf()
+
 
