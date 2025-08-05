@@ -122,10 +122,8 @@ for idx_method, method in enumerate(rm_list):
 
         if mortality == 'qx_exproj':
             q_xt = np.array([envParams["qx_exproj"] for _ in range(Nsimulations)])
-        elif mortality == 'qx_proj':
-            q_xt = np.array([envParams["qx_proj"] for _ in range(Nsimulations)])
         elif mortality == 'qx_lc':
-            q_xt = env.LC_mortality_generator(Nsimulations, num_years=envParams["Ndt"])
+            q_xt = np.array([envParams["qx_lc"] for _ in range(Nsimulations)])
 
 
         # create policy & value function objects
@@ -222,19 +220,19 @@ for idx_method, method in enumerate(rm_list):
 
             fig = plt.figure(figsize=(12, 8))
             ax = fig.add_subplot(111, projection='3d')
-            # Compute the 2D kernel density estimate
+            # compute the 2D kernel density estimate
             X2, Y2 = np.meshgrid(np.linspace(max(0, A_mean.detach().item() - 4*A_std.detach().item()),
                                            A_mean.detach().item() + 4*A_std.detach().item(), 100),
                                np.linspace(max(0, I_mean.detach().item() - 4*I_std.detach().item()),
                                            I_mean.detach().item() + 4*I_std.detach().item(), 100))
 
-            # Probability Density
+            # probability density
             pos = np.empty(X2.shape + (2,))
             pos[:, :, 0] = X2
             pos[:, :, 1] = Y2
             Z2 = rv.pdf(pos)
 
-            # Plot the 3D surface
+            # plot the 3D surface
             surf = ax.plot_surface(X2, Y2, Z2,
                                    rstride=1, cstride=1,
                                    cmap='viridis',
@@ -249,10 +247,6 @@ for idx_method, method in enumerate(rm_list):
             plt.tick_params(axis='both', labelsize=12)
             plt.tick_params(axis='z', labelsize=12)
 
-            # Adjust the layout and save the figure
-            # plt.suptitle(" - Distribution of the Optimal Strategy (A, I) with E[X] ="
-            #               + str("{:.2f}".format(x_mean)) + " E[Y] = " + str("{:.2f}".format(y_mean)))
-            # fig.colorbar(surf, shrink=0.5, aspect=5)
             plt.tight_layout()
             plt.savefig(repo + '/' + mortality + '/fixed_optimal_A_I_3d_t' + str(t) + '.pdf', transparent=True, dpi=600)
             plt.clf()
@@ -430,7 +424,7 @@ for idx_method, method in enumerate(rm_list):
         ax1.set_ylim([min(A_mean - 4 * A_std), max(A_mean + 4 * A_std)])
 
         # modify x-tick labels for ax1
-        x_ticks = np.arange(envParams["Ndt"]) + 22  # Shift x-tick labels by 22
+        x_ticks = np.arange(envParams["Ndt"]) + 22  
         all_labels = [str(x_ticks[i]) for i in np.arange(envParams["Ndt"])]  # create labels for all ticks
         selective_idx = np.arange(0, len(all_labels), 5)  # Indices of the labels to show
         selective_labels = [all_labels[i] for i in selective_idx]
@@ -506,7 +500,7 @@ for idx_method, method in enumerate(rm_list):
             if i not in selective_idx:
                 tick.label1.set_visible(False)
 
-        # Save the plot
+        # save the plot
         plt.tight_layout()
         plt.savefig(repo + '/' + mortality + '/dynamic_optimal_policy.pdf',
                     transparent=True, dpi=600)
@@ -572,43 +566,10 @@ for idx_method, method in enumerate(rm_list):
                 transparent=True, dpi=600)
     plt.clf()
 
-    ### Graph 5: Plots of mortality settings
-    # call mortality rate lists
-    qx_exproj = envParams["qx_exproj"]
-    qx_lc = np.mean(env.LC_mortality_generator(1), axis=0)
-
-    # create a range for the x-axis
-    ages = list(range(22, len(qx_exproj)+22))
-
-    # create the figure
-    plt.figure(figsize=(8, 6))
-
-    # plot each mortality rate on the same axes
-    plt.plot(ages, qx_exproj, label='Mortality Rate (2022)', marker='o', color=utils.mblue)
-    plt.plot(ages, qx_lc, label='Mortality Rate (LC projection 2022-2066)', marker='o', color=utils.mred)
-
-    # adding titles and labels
-    plt.xlabel('Age', fontsize=14)
-    plt.ylabel(r'$\ln(m_{x,t})$', fontsize=14)
-    # plt.ylabel('Mortality Rate', fontsize=14)
-    plt.tick_params(axis='both', labelsize=12)
-    plt.legend(fontsize=12)
-    plt.grid()
-
-    # customize x-ticks
-    plt.xticks(ages)
-    all_labels = [str(age) for age in ages]
-    selective_idx = np.arange(0, len(all_labels), 5)
-    plt.xticks(ticks=[ages[i] for i in selective_idx], labels=[all_labels[i] for i in selective_idx])
-
-    # save the plot
-    plt.tight_layout()  # adjust layout to prevent overlap
-    plt.savefig(repo + '/Mortality_comparison.pdf', transparent=True, dpi=600)
-    plt.clf()
-
 
 # print progress
 print('*** Testing phase completed! ***')
+
 
 
 
