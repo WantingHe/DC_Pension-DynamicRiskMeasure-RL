@@ -83,27 +83,3 @@ class TradingEnv():
 
         return x_tp1, y_tp1, cost_t_a, cost_t_b
 
-    def LC_mortality_generator(self, num_ind, num_years=45):
-
-        # Initialize the array to hold death probabilities
-        qx_lc = np.zeros((num_ind, num_years))
-        qx_lc[:, 0] = self.params["qx_exproj"][0] * np.ones(num_ind)
-
-        for i in range(num_ind):
-            # Generate age-specific factors
-            a = T.tensor(self.params['a_x'], device=self.device)
-            b = T.tensor(self.params['b_x'], device=self.device)
-            k = T.tensor(self.params['k_t'], device=self.device)
-
-            for year in range(num_years-1):
-                # Calculate central mortality rate based on Lee-Carter model
-                ln_m_xt = a[year] + b[year] * k[year]
-                # noise = np.random.normal(0, 0.0001)  # add random noise to simulate individual cases
-
-                # Ensure mortality rate is within [0, 1] with individual noise
-                qx_lc[i, year+1] = np.exp(ln_m_xt.cpu()).to(self.device)  # + noise
-
-        return qx_lc  # Return as a numpy array of shape (N, 45)
-
-
-
