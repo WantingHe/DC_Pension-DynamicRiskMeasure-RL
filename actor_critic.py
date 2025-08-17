@@ -277,7 +277,10 @@ class ActorCriticPG():
                      (1 - mortality_batch[:, col_idx]) * self.risk_measure.compute_risk_a(cost_t_a[:, :, col_idx] + np.exp(-self.params["r"])*v_tp1[:, :, col_idx])
 
             # value function for the last time step
-            v_target[:, -1] = self.risk_measure.compute_risk_a(-transitions["x_tp1"][batch_idx, :, -1])
+            v_target[:, -1] = mortality_batch[:, -1] * self.risk_measure.compute_risk_b(transitions["cost_t_b"][batch_idx, :, -1]) + \
+                (1 - mortality_batch[:, -1]) * self.risk_measure.compute_risk_a(
+                transitions["cost_t_a"][batch_idx, :, -1] + \
+                np.exp(-self.params["r"])*self.risk_measure.compute_risk_a(-transitions["x_tp1"][batch_idx, :, -1]))
 
             # calculate the loss function
             v_loss = self.V.loss(v_target.detach().to(self.device), v_pred.to(self.device))
